@@ -12,7 +12,10 @@ class FileHandler {
         }
         const reader = new FileReader();
         reader.onload = (e) => {
-          resolve(e.target.result);
+          resolve({
+            content: e.target.result,
+            file,
+          });
         };
         reader.onerror = () => {
           reject(new Error("Failed to read the file"));
@@ -27,9 +30,10 @@ class FileHandler {
   }
 
   static readJson(accept = ".json") {
-    return FileHandler.readText(accept).then((text) => {
+    return FileHandler.readText(accept).then((result) => {
       try {
-        return JSON.parse(text);
+        result.content = JSON.parse(result.content);
+        return result;
       } catch (error) {
         throw new Error("Invalid JSON format: " + error.message);
       }
