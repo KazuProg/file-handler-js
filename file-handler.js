@@ -1,4 +1,7 @@
+"use strict";
+
 class FileHandler {
+  // テキストファイルを読み込む
   static readText(accept = ".txt") {
     return new Promise((resolve, reject) => {
       const input = document.createElement("input");
@@ -7,8 +10,7 @@ class FileHandler {
       input.onchange = (e) => {
         const file = e.target.files[0];
         if (!file) {
-          reject(new Error("No file selected"));
-          return;
+          return reject(new Error("No file selected"));
         }
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -29,6 +31,7 @@ class FileHandler {
     });
   }
 
+  // JSONファイルを読み込む
   static readJson(accept = ".json") {
     return FileHandler.readText(accept).then((result) => {
       try {
@@ -40,15 +43,16 @@ class FileHandler {
     });
   }
 
+  // 任意のデータをダウンロードする
   static download(
     filename = "download",
     content,
     type = "application/octet-stream"
   ) {
     if (!content) {
-      console.error("Content is required to download a file.");
-      return;
+      return console.error("Content is required to download a file.");
     }
+
     try {
       const blob = new Blob([content], { type });
       const url = URL.createObjectURL(blob);
@@ -62,14 +66,24 @@ class FileHandler {
     }
   }
 
+  // テキストファイルをダウンロードする
   static downloadText(filename, content) {
+    if (typeof content !== "string") {
+      console.error("Content must be a string.");
+      return;
+    }
     FileHandler.download(filename, content, "text/plain");
   }
 
+  // JSONファイルをダウンロードする
   static downloadJson(filename, obj, prettyPrint = false) {
-    const content = prettyPrint
-      ? JSON.stringify(obj, null, 2)
-      : JSON.stringify(obj);
-    FileHandler.download(filename, content, "application/json");
+    try {
+      const content = prettyPrint
+        ? JSON.stringify(obj, null, 2)
+        : JSON.stringify(obj);
+      FileHandler.download(filename, content, "application/json");
+    } catch (error) {
+      console.error("Failed to serialize object to JSON:", error);
+    }
   }
 }
